@@ -1,0 +1,14 @@
+[[source]]
+url = "https://mirrors.cloud.tencent.com/pypi/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+scrapy = "*"
+pymysql = "*"
+iso3166 = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
