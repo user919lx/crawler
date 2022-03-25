@@ -6,7 +6,7 @@ import json
 
 class GameEUSpider(Spider):
     name = "game_eu"
-    row_num_per_page = 100
+    row_num_per_page = 500
 
     request_params = {
         "rows": str(row_num_per_page),
