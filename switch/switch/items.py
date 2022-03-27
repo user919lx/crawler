@@ -34,3 +34,10 @@ class PriceItem(Item):
     nsuid = Field()
     alpha2 = Field()
     raw_data = Field()
+
+
+class GameNAMultItem(Item):
+    url = Field()
+    local = Field()
+    wireless = Field()
+    online = Field()
