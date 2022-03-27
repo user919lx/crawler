@@ -17,6 +17,7 @@ class GameEUSpider(Spider):
         "wt": "json",
     }
     url = "http://search.nintendo-europe.com/en/select"
+    custom_settings = {"CONCURRENT_REQUESTS_PER_DOMAIN": "1", "DOWNLOAD_DELAY": "1"}
 
     def start_requests(self):
         yield FormRequest(url=self.url, method="GET", formdata=self.request_params, callback=self.parse)
