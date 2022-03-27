@@ -18,8 +18,7 @@ class GameNAMultSpider(Spider):
     def start_requests(self):
         self.db.open()
         rows = self.db.fetchall("game_na")
-        # TODO:正式发布后去掉切片
-        for row in rows[:5]:
+        for row in rows:
             url = row["url"]
             yield FormRequest(url=url, method="GET", callback=self.parse)
 
