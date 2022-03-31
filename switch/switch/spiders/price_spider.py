@@ -42,8 +42,8 @@ class PriceSpider(Spider):
             nsuid_list = data["nsuid_list"]
             nsuid_count = len(nsuid_list)
             count_per_page = 50
-            page_count = int(nsuid_count / count_per_page)+1
-            for page in range(page_count+1):
+            page_count = int(nsuid_count / count_per_page) + 1
+            for page in range(page_count + 1):
                 idx1 = page * count_per_page
                 idx2 = (page + 1) * count_per_page
                 nsuid_slice = nsuid_list[idx1:idx2]
@@ -58,7 +58,12 @@ class PriceSpider(Spider):
             jdict = json.loads(response.text)
             if jdict.get("prices"):
                 for row in jdict.get("prices"):
-                    data = {"nsuid": row["title_id"], "alpha2": alpha2, "raw_data": json.dumps(row, ensure_ascii=True)}
+                    data = {
+                        "nsuid": row["title_id"],
+                        "alpha2": alpha2,
+                        "sales_status": row["sales_status"],
+                        "raw_data": json.dumps(row, ensure_ascii=True),
+                    }
                     item = PriceItem(**data)
                     yield item
 

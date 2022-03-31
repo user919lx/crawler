@@ -33,6 +33,7 @@ class GameJPItem(Item):
 class PriceItem(Item):
     nsuid = Field()
     alpha2 = Field()
+    sales_status = Field()
     raw_data = Field()
 
 
