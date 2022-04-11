@@ -45,6 +45,12 @@ class GameDekuSpider(Spider):
         else:
             return "[]"
 
+    def __get_next_sibling_text(self, tag):
+        if tag.next_sibling:
+            return html.unescape(tag.next_sibling.text)
+        else:
+            return None
+
     def __get_info(self, soup):
         item_list = soup.find_all("li", {"class": "list-group-item"})
         data = {}
@@ -52,7 +58,7 @@ class GameDekuSpider(Spider):
             strong = item.strong
             key = strong.text.replace(":", "").strip().lower().replace(" ", "_")
             if key in ["demo_available", "download_size", "esrb_rating", "play_modes", "languages"]:
-                value = html.unescape(strong.next_sibling.text)
+                value = self.__get_next_sibling_text(strong)
                 data[key] = value
             elif key in ["released", "number_of_players"]:
                 if item.ul:
@@ -64,7 +70,7 @@ class GameDekuSpider(Spider):
                         sub_data.append({"key": sub_key.strip(), "value": sub_value.strip()})
                     data[key] = json.dumps(sub_data)
                 else:
-                    data[key] = html.unescape(strong.next_sibling.text)
+                    data[key] = self.__get_next_sibling_text(strong)
             elif key in ["genre"]:
                 value = [a.text for a in item.find_all("a")]
                 data[key] = value
@@ -84,7 +90,7 @@ class GameDekuSpider(Spider):
                 for subitem in item.ul.find_all("li"):
                     sub_strong = subitem.strong
                     sub_key = sub_strong.text.replace(":", "")
-                    sub_value = html.unescape(sub_strong.next_sibling.text)
+                    sub_value = self.__get_next_sibling_text(sub_strong)
                     sub_data.append({"key": sub_key.strip(), "value": sub_value.strip()})
                 data["how_long_to_beat"] = json.dumps(sub_data)
         return data
