@@ -17,7 +17,8 @@ class GameNAMultSpider(Spider):
 
     def start_requests(self):
         self.db.open()
-        rows = self.db.fetchall("game_na")
+        rows = self.db.fetchall("game_na", filter_clause="num_of_players between 6 and 8")
+        self.db.close()
         for row in rows:
             url = row["url"]
             yield FormRequest(url=url, method="GET", callback=self.parse)

@@ -29,8 +29,9 @@ class MySQLPipeline:
             self.storage.save("eshop", item_dict)
         elif spider.name == "price":
             self.storage.save("price_raw", item_dict)
-        elif spider.name in ("game_eu", "game_hk", "game_jp"):
+        elif spider.name in ("game_eu", "game_hk", "game_jp", "game_deku"):
             self.storage.save("game_raw", item_dict, compress_keys=["raw_data"])
         elif spider.name == "game_na_mult":
+            self.storage.db.ping()
             self.storage.save("game_na_mult", item_dict)
         return item

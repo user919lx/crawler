@@ -8,6 +8,7 @@ scrapy = "*"
 pymysql = "*"
 iso3166 = "*"
 beautifulsoup4 = "*"
+python-slugify = "*"
 
 [dev-packages]
 

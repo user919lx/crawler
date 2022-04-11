@@ -41,6 +41,10 @@ class MySQLStorage:
             values = values * 2
         return values
 
+    def query(self, sql):
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
     def fetchall(self, table, filter_clause=""):
         sql = f"SELECT * from {table}"
         if filter_clause:
