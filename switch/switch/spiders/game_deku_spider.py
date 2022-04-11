@@ -15,12 +15,21 @@ class GameDekuSpider(Spider):
 
     custom_settings = {"CONCURRENT_REQUESTS_PER_DOMAIN": "1", "DOWNLOAD_DELAY": "1"}
 
+    slug_dict = {
+        "Pokémon Sword + Pokémon Sword Expansion Pass": "pokmon-sword-plus-expansion-pass",
+        "Pokémon Shield + Pokémon Shield Expansion Pass": "pokmon-shield-plus-expansion-pass",
+        "BOXBOY! + BOXGIRL!": "boxboy-and-boxgirl",
+    }
+
     def __init__(self):
         self.db = MySQLStorage(MYSQL_CONFIG)
 
     def __get_slug(self, text):
+        map_slug = self.slug_dict.get(text)
+        if map_slug:
+            return map_slug
         text = re.sub("[™®]", "", text)
-        slug = slugify(text, replacements=[["+", "plus"]])
+        slug = slugify(text, replacements=[["+", "plus"], ["〇", "o"], ["＆", "and"]])
         return slug
 
     def __get_name(self, soup):
@@ -83,29 +92,28 @@ class GameDekuSpider(Spider):
     def start_requests(self):
         self.db.open()
         sql = """
-            select gn.name
-            from (select *,substring_index(url,'/',-2) slug from game_na) gn
-                left join (select substring_index(url,'/',-2) slug from game_na_mult where local is not null) mul on gn.slug = mul.slug
-            where mul.slug is null
+            select gn.name, gn.slug
+                from (select *,replace(substring_index(url,'/',-2),'-switch/','') slug from game_na) gn
+                left join (select replace(substring_index(url,'/',-2),'-switch/','') slug from game_na_mult where local is not null) mul on gn.slug = mul.slug
+                left join (select unique_id from game_raw where region='deku') raw on gn.slug = raw.unique_id
+            where mul.slug is null and raw.unique_id is null
             """
         rows = self.db.query(sql)
         self.db.close()
-        slug_set = set([self.__get_slug(row["name"]) for row in rows])
-        for slug in slug_set:
+        origin_slug_set = set([row["slug"] for row in rows])
+        custom_slug_set = set([self.__get_slug(row["name"]) for row in rows])
+        all_slug_set = origin_slug_set | custom_slug_set
+        for slug in all_slug_set:
             url = f"https://www.dekudeals.com/items/{slug}"
             yield FormRequest(url=url, method="GET", callback=self.parse)
 
     def parse(self, response):
         soup = BeautifulSoup(response.text, "html.parser")
-        try:
-            name = self.__get_name(soup)
-            info_data = self.__get_info(soup)
-            history_price_data = self.__get_price_data(soup)
-            data = {"name": name, "history_price": history_price_data}
-            data.update(info_data)
-            raw_str = json.dumps(data, ensure_ascii=True)
-            item = GameRawItem(unique_id=self.__get_slug(name), region="deku", raw_data=raw_str)
-            yield item
-        except Exception as e:
-            print(e)
-            print(response.url)
+        name = self.__get_name(soup)
+        info_data = self.__get_info(soup)
+        history_price_data = self.__get_price_data(soup)
+        data = {"name": name, "history_price": history_price_data}
+        data.update(info_data)
+        raw_str = json.dumps(data, ensure_ascii=True)
+        item = GameRawItem(unique_id=self.__get_slug(name), region="deku", raw_data=raw_str)
+        yield item
