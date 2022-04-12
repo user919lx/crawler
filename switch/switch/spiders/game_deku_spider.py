@@ -100,15 +100,14 @@ class GameDekuSpider(Spider):
         sql = """
             select gn.name, gn.slug
                 from (select *,replace(substring_index(url,'/',-2),'-switch/','') slug from game_na) gn
-                left join (select replace(substring_index(url,'/',-2),'-switch/','') slug from game_na_mult where local is not null) mul on gn.slug = mul.slug
                 left join (select unique_id from game_raw where region='deku') raw on gn.slug = raw.unique_id
-            where mul.slug is null and raw.unique_id is null
+            where raw.unique_id is null
             """
         rows = self.db.query(sql)
         self.db.close()
         origin_slug_set = set([row["slug"] for row in rows])
-        custom_slug_set = set([self.__get_slug(row["name"]) for row in rows])
-        all_slug_set = origin_slug_set | custom_slug_set
+        parse_slug_set = set([self.__get_slug(row["name"]) for row in rows])
+        all_slug_set = origin_slug_set | parse_slug_set
         for slug in all_slug_set:
             url = f"https://www.dekudeals.com/items/{slug}"
             yield FormRequest(url=url, method="GET", callback=self.parse)
@@ -116,10 +115,11 @@ class GameDekuSpider(Spider):
     def parse(self, response):
         soup = BeautifulSoup(response.text, "html.parser")
         name = self.__get_name(soup)
-        info_data = self.__get_info(soup)
-        history_price_data = self.__get_price_data(soup)
-        data = {"name": name, "history_price": history_price_data}
-        data.update(info_data)
-        raw_str = json.dumps(data, ensure_ascii=True)
-        item = GameRawItem(unique_id=self.__get_slug(name), region="deku", raw_data=raw_str)
-        yield item
+        if "Search - " not in name:
+            info_data = self.__get_info(soup)
+            history_price_data = self.__get_price_data(soup)
+            data = {"name": name, "history_price": history_price_data}
+            data.update(info_data)
+            raw_str = json.dumps(data, ensure_ascii=True)
+            item = GameRawItem(unique_id=self.__get_slug(name), region="deku", raw_data=raw_str)
+            yield item
