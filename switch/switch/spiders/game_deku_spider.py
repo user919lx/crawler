@@ -114,6 +114,7 @@ class GameDekuSpider(Spider):
 
     def parse(self, response):
         soup = BeautifulSoup(response.text, "html.parser")
+        slug = response.url.split("/")[-1]
         name = self.__get_name(soup)
         if "Search - " not in name:
             info_data = self.__get_info(soup)
@@ -121,5 +122,5 @@ class GameDekuSpider(Spider):
             data = {"name": name, "history_price": history_price_data}
             data.update(info_data)
             raw_str = json.dumps(data, ensure_ascii=True)
-            item = GameRawItem(unique_id=self.__get_slug(name), region="deku", raw_data=raw_str)
+            item = GameRawItem(unique_id=slug, region="deku", raw_data=raw_str)
             yield item
