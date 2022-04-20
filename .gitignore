@@ -2,6 +2,7 @@
 data/
 *.sh
 *.log
+docs_local
 
 .data
 .DS_Store
