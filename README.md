@@ -41,9 +41,9 @@ scrapy crawl xxx # 替换成自己需要的
 
 * eshop_spider: 获取可用商店，存入eshop表
 * game_deku_spider:获取dekudeals.com网站的的游戏信息。此网站仅作为数据补充，主要补充多人游戏信息，媒体评分，游戏时长信息。从美区游戏列表同步，每个游戏只获取一次。
-* game_eu_spider: 获取欧区游戏信息
-* game_hk_spider: 获取港区游戏信息
-* game_jp_spider: 获取日区游戏信息
-* price: 获取价格信息
+* game_eu_spider: 获取欧区游戏信息，存入game_raw，region='eu'
+* game_hk_spider: 获取港区游戏信息，存入game_raw，region='hk'
+* game_jp_spider: 获取日区游戏信息，存入game_raw，region='jp'
+* price: 获取价格信息，存入price_raw
 
 注：美区的数据获取较麻烦，放在项目switch_etl中
